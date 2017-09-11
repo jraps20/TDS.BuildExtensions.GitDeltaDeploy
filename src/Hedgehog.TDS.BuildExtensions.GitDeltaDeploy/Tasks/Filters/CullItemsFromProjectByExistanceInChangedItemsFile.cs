@@ -1,4 +1,5 @@
-﻿using HedgehogDevelopment.SitecoreCommon.Data.Items;
+﻿using System;
+using HedgehogDevelopment.SitecoreCommon.Data.Items;
 using HedgehogDevelopment.SitecoreProject.Tasks.Extensibility;
 using System.IO;
 using System.Linq;
@@ -7,6 +8,10 @@ namespace Hedgehog.TDS.BuildExtensions.GitDeltaDeploy.Tasks.Filters
 {
     public class CullItemsFromProjectByExistanceInChangedItemsFile : ICanIncludeItem
     {
+        private static string[] _changedFiles;
+
+        private static bool _fileRead;
+
         public bool IncludeItemInBuild(string parameters, IItem parsedItem, string filePath)
         {
             if (!File.Exists(parameters))
@@ -14,7 +19,15 @@ namespace Hedgehog.TDS.BuildExtensions.GitDeltaDeploy.Tasks.Filters
                 return true;
             }
 
-            var changedFiles = File.ReadAllLines(parameters);
+            Console.WriteLine("File path: " + filePath);
+
+            if (!_fileRead)
+            {
+                Console.WriteLine("Opening file: " + parameters);
+                _changedFiles = File.ReadAllLines(parameters);
+                _fileRead = true;
+                Console.WriteLine("Finished reading file: " + parameters);
+            }
 
             var convertedFilePath = filePath.Replace(@"\", @"/");
 
@@ -23,7 +36,7 @@ namespace Hedgehog.TDS.BuildExtensions.GitDeltaDeploy.Tasks.Filters
             var sw = new StreamWriter(folderPath + @"\DeltaDeployCompare.txt", true);
             sw.WriteLine("TDS Item filePath is " + convertedFilePath);
 
-            foreach (var file in changedFiles)
+            foreach (var file in _changedFiles)
             {
                 sw.WriteLine("Git changed item file path is " + file);
             }
@@ -42,7 +55,7 @@ namespace Hedgehog.TDS.BuildExtensions.GitDeltaDeploy.Tasks.Filters
             //   relative path from repo root, 
             //     e.g. TDSProjects/TDS.Master/sitecore/content/myitem.item
 
-            return changedFiles.Any(x => convertedFilePath.EndsWith(x)) || changedFiles.Any(x => x.EndsWith(convertedFilePath));
+            return _changedFiles.Any(x => convertedFilePath.EndsWith(x)) || _changedFiles.Any(x => x.EndsWith(convertedFilePath));
         }
     }
 }
