@@ -19,8 +19,6 @@ namespace Hedgehog.TDS.BuildExtensions.GitDeltaDeploy.Tasks.Filters
                 return true;
             }
 
-            Console.WriteLine("File path: " + filePath);
-
             if (!_fileRead)
             {
                 Console.WriteLine("Opening file: " + parameters);
@@ -32,6 +30,8 @@ namespace Hedgehog.TDS.BuildExtensions.GitDeltaDeploy.Tasks.Filters
             var convertedFilePath = filePath.Replace(@"\", @"/");
 
 #if DEBUG
+            Console.WriteLine("File path: " + filePath);
+
             var folderPath = Path.GetDirectoryName(parameters);
             var sw = new StreamWriter(folderPath + @"\DeltaDeployCompare.txt", true);
             sw.WriteLine("TDS Item filePath is " + convertedFilePath);
